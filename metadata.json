@@ -1,0 +1,5 @@
+{
+  "name": "My AI Bookstore",
+  "description": "A personalized AI-powered bookstore that recommends books based on your mood and interests using Gemini.",
+  "requestFramePermissions": []
+}
