@@ -1,75 +1,61 @@
-import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { Book } from '../types';
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI 책 추천</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input {
+        padding: 6px;
+        width: 200px;
+      }
+      button {
+        padding: 6px 10px;
+        margin-left: 4px;
+      }
+      .book {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+      .title {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📚 AI 책 추천</h2>
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    <input id="query" placeholder="예: 힐링되는 에세이" />
+    <button onclick="recommend()">추천 받기</button>
 
-// Initialize the Gemini client
-const ai = new GoogleGenAI({ apiKey: apiKey });
+    <div id="result"></div>
 
-// Define the schema for book responses
-const bookSchema: Schema = {
-  type: Type.ARRAY,
-  items: {
-    type: Type.OBJECT,
-    properties: {
-      title: {
-        type: Type.STRING,
-        description: "The title of the book.",
-      },
-      author: {
-        type: Type.STRING,
-        description: "The author of the book.",
-      },
-      description: {
-        type: Type.STRING,
-        description: "A short, engaging description of the book (approx 20-30 words).",
-      },
-      category: {
-        type: Type.STRING,
-        description: "The genre or category of the book.",
-      },
-      price: {
-        type: Type.STRING,
-        description: "Estimated price in KRW (e.g., 18,000원).",
-      },
-      rating: {
-        type: Type.NUMBER,
-        description: "Rating out of 5 (e.g., 4.5).",
-      },
-    },
-    required: ["title", "author", "description", "category", "price", "rating"],
-  },
-};
+    <script>
+      function recommend() {
+        const query = document.getElementById("query").value;
+        const result = document.getElementById("result");
+        result.textContent = "불러오는 중...";
 
-export const fetchBookRecommendations = async (userQuery: string): Promise<Book[]> => {
-  try {
-    const model = 'gemini-2.5-flash';
-    const systemInstruction = `You are a knowledgeable and tasteful bookstore curator. 
-    Your goal is to recommend books based on the user's mood, interests, or specific requests. 
-    Ensure the recommendations are diverse and high-quality. 
-    If the user's query is in Korean, provide descriptions in Korean. 
-    If in English, provide in English.`;
+        google.script.run.withSuccessHandler((data) => {
+          result.innerHTML = "";
 
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: userQuery,
-      config: {
-        systemInstruction: systemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: bookSchema,
-        temperature: 0.7,
-      },
-    });
-
-    const jsonText = response.text;
-    if (!jsonText) {
-      throw new Error("No data received from Gemini.");
-    }
-
-    const books: Book[] = JSON.parse(jsonText);
-    return books;
-  } catch (error) {
-    console.error("Error fetching books:", error);
-    throw error;
-  }
-};
+          data.forEach((book) => {
+            const div = document.createElement("div");
+            div.className = "book";
+            div.innerHTML = `
+              <div class="title">📖 ${book.title}</div>
+              <div>✍ ${book.author}</div>
+              <div>💡 ${book.reason}</div>
+            `;
+            result.appendChild(div);
+          });
+        }).getBookRecommendations(query);
+      }
+    </script>
+  </body>
+</html>
