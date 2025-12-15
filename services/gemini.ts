@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { Book } from '../types';
 
-import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Initialize the Gemini client
 const ai = new GoogleGenAI({ apiKey: apiKey });
